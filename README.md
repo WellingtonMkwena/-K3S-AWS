@@ -120,9 +120,9 @@ Record the values — you will need them throughout this guide:
 
 | Hostname | Private IP | Public IP |
 |----------|------------|-----------|
-| k3s-master-1 | 10.0.x.x | 1.2.3.4 |
-| k3s-master-2 | 10.0.x.x | 1.2.3.5 |
-| k3s-master-3 | 10.0.x.x | 1.2.3.6 |
+| k3s-master-1 | 172.31.89.40 | 1.2.3.4 |
+| k3s-master-2 | 172.31.88.253 | 1.2.3.5 |
+| k3s-master-3 | 172.31.94.78 | 1.2.3.6 |
 
 ---
 
@@ -135,10 +135,14 @@ Run the following on **each** of the 3 instances.
 ```sh
 ssh -i ~/.ssh/$KEY_NAME.pem ubuntu@<public-ip>
 ```
+ssh -i k3s-master-1key.pem ubuntu@3.91.148.152
+ssh -i k3s-master-2key.pem ubuntu@13.221.80.236
+ssh -i k3s-master-3key.pem ubuntu@100.53.103.158
+
 
 ### 2.2 — Set the hostname (run separately on each node)
 
-```sh
+
 # On k3s-master-1
 sudo hostnamectl set-hostname k3s-master-1
 
@@ -167,6 +171,11 @@ sudo tee -a /etc/hosts <<EOF
 10.0.1.12  k3s-master-3
 EOF
 ```
+sudo tee -a /etc/hosts <<EOF
+172.31.89.40  k3s-master-1
+172.31.88.253  k3s-master-2
+172.31.94.78  k3s-master-3
+EOF
 
 > K3s does not require swap to be disabled, but it is recommended for predictable performance.
 > ```sh
@@ -198,6 +207,18 @@ tls-san:
 disable: [servicelb, traefik]
 EOF
 ```
+sudo mkdir -p /etc/rancher/k3s
+sudo tee /etc/rancher/k3s/config.yaml <<EOF
+cluster-init: true
+node-ip: 172.31.89.40
+advertise-address: 172.31.89.40
+tls-san:
+  - 172.31.89.40
+  -  3.91.148.152
+  - k3s-master-1
+disable: [servicelb, traefik]
+EOF
+
 
 > **Why `disable: [servicelb, traefik]`?**
 > - `servicelb` (Klipper) is replaced by the AWS cloud controller or an NLB.
@@ -249,6 +270,32 @@ tls-san:
 disable: [servicelb, traefik]
 EOF
 ```
+sudo mkdir -p /etc/rancher/k3s
+sudo tee /etc/rancher/k3s/config.yaml <<EOF
+server: https://172.31.89.40:6443
+token: token: K1026acf5ddbad241d13c37394efcec3d79e41575e6b1a9373238df212c2fb52a7a::server:1708a058a33ae00adead7f4b8d3f057e
+node-ip: 172.31.88.253
+advertise-address: 172.31.88.253
+tls-san:
+  - 172.31.88.253
+  - 52.54.242.24
+  - k3s-master-2
+disable: [servicelb, traefik]
+EOF
+
+
+sudo mkdir -p /etc/rancher/k3s
+sudo tee /etc/rancher/k3s/config.yaml <<EOF
+server: https://172.31.89.40:6443
+token: token: K1026acf5ddbad241d13c37394efcec3d79e41575e6b1a9373238df212c2fb52a7a::server:1708a058a33ae00adead7f4b8d3f057e
+node-ip: 172.31.94.78
+advertise-address: 172.31.94.78
+tls-san:
+  - 172.31.94.78
+  - 54.174.15.71
+  - k3s-master-3
+disable: [servicelb, traefik]
+EOF
 
 ### 4.2 — Install K3s as a server node
 

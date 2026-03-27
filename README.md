@@ -172,9 +172,9 @@ sudo tee -a /etc/hosts <<EOF
 EOF
 ```
 sudo tee -a /etc/hosts <<EOF
-172.31.89.40  k3s-master-1
-172.31.88.253  k3s-master-2
-172.31.94.78  k3s-master-3
+172.31.89.40  k3s-master-1 
+172.31.88.253  k3s-master-2 
+172.31.94.78  k3s-master-3 
 EOF
 
 > K3s does not require swap to be disabled, but it is recommended for predictable performance.
@@ -207,17 +207,17 @@ tls-san:
 disable: [servicelb, traefik]
 EOF
 ```
-sudo mkdir -p /etc/rancher/k3s
-sudo tee /etc/rancher/k3s/config.yaml <<EOF
-cluster-init: true
-node-ip: 172.31.89.40
-advertise-address: 172.31.89.40
-tls-san:
-  - 172.31.89.40
-  -  3.91.148.152
-  - k3s-master-1
-disable: [servicelb, traefik]
-EOF
+sudo mkdir -p /etc/rancher/k3s 
+sudo tee /etc/rancher/k3s/config.yaml <<EOF 
+cluster-init: true 
+node-ip: 172.31.89.40 
+advertise-address: 172.31.89.40 
+tls-san: 
+  - 172.31.89.40 
+  -  3.91.148.152 
+  - k3s-master-1 
+disable: [servicelb, traefik] 
+EOF 
 
 
 > **Why `disable: [servicelb, traefik]`?**
